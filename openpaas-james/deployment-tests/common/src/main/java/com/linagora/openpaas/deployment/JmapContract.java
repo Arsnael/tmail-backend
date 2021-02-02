@@ -28,22 +28,18 @@ public interface JmapContract {
 
     @BeforeEach
     default void setUp() throws Exception {
-        System.out.println("BeforeEach start");
         jmapContainer().execInContainer("james-cli", "AddDomain", "domain.tld");
         jmapContainer().execInContainer("james-cli", "AddUser", BOB.asString(), BOB_PASSWORD);
-
-        System.out.println("BeforeEach middle");
 
         PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
         authScheme.setUserName(BOB.asString());
         authScheme.setPassword(BOB_PASSWORD);
         RestAssured.requestSpecification = jmapRequestSpecBuilder
+            .setBaseUri("http://" + jmapContainer().getContainerIpAddress())
             .setPort(jmapContainer().getMappedPort(80))
             .setAccept(ContentType.JSON + "; jmapVersion=rfc-8621")
             .setAuth(authScheme)
             .build();
-
-        System.out.println("BeforeEach stops");
    }
 
    @Test
