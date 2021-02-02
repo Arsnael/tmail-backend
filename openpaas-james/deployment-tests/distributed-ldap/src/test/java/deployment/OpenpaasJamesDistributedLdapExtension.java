@@ -39,7 +39,7 @@ public class OpenpaasJamesDistributedLdapExtension implements BeforeEachCallback
 
     @SuppressWarnings("resource")
     public GenericContainer<?> createLdap(Network network) {
-        return new GenericContainer<>("james_ldap")
+        return new GenericContainer<>("dinkel/openldap:latest")
             .withNetworkAliases("ldap")
             .withNetwork(network)
             .withEnv("SLAPD_DOMAIN", "james.org")
