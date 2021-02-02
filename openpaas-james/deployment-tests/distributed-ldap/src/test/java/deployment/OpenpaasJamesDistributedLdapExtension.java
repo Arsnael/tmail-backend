@@ -39,13 +39,13 @@ public class OpenpaasJamesDistributedLdapExtension implements BeforeEachCallback
 
     @SuppressWarnings("resource")
     public GenericContainer<?> createLdap(Network network) {
-        return new GenericContainer<>("dinkel/openldap:latest")
+        return new GenericContainer<>("james_ldap")
             .withNetworkAliases("ldap")
             .withNetwork(network)
             .withEnv("SLAPD_DOMAIN", "james.org")
             .withEnv("SLAPD_PASSWORD", "mysecretpassword")
-            .withEnv("SLAPD_CONFIG_PASSWORD", "mysecretpassword")
-            .withClasspathResourceMapping("populate.ldif", "/etc/ldap/prepopulate/populate.ldif", BindMode.READ_ONLY);
+            .withEnv("SLAPD_CONFIG_PASSWORD", "mysecretpassword");
+            // .withClasspathResourceMapping("populate.ldif", "/etc/ldap/prepopulate/populate.ldif", BindMode.READ_ONLY);
     }
 
     @SuppressWarnings("resource")
