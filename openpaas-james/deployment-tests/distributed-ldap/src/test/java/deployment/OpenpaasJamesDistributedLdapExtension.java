@@ -44,8 +44,8 @@ public class OpenpaasJamesDistributedLdapExtension implements BeforeEachCallback
             .withNetwork(network)
             .withEnv("SLAPD_DOMAIN", "james.org")
             .withEnv("SLAPD_PASSWORD", "mysecretpassword")
-            .withEnv("SLAPD_CONFIG_PASSWORD", "mysecretpassword");
-            // .withClasspathResourceMapping("populate.ldif", "/etc/ldap/prepopulate/populate.ldif", BindMode.READ_ONLY);
+            .withEnv("SLAPD_CONFIG_PASSWORD", "mysecretpassword")
+            .withClasspathResourceMapping("populate.ldif", "/etc/ldap/prepopulate/populate.ldif", BindMode.READ_WRITE);
     }
 
     @SuppressWarnings("resource")
