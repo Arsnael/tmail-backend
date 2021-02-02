@@ -2,7 +2,6 @@ package deployment;
 
 import static com.linagora.openpaas.deployment.ThirdPartyContainers.createCassandra;
 import static com.linagora.openpaas.deployment.ThirdPartyContainers.createElasticsearch;
-import static com.linagora.openpaas.deployment.ThirdPartyContainers.createLdap;
 import static com.linagora.openpaas.deployment.ThirdPartyContainers.createRabbitMQ;
 import static com.linagora.openpaas.deployment.ThirdPartyContainers.createS3;
 
@@ -12,6 +11,7 @@ import org.apache.james.util.Runnables;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -35,6 +35,17 @@ public class OpenpaasJamesDistributedLdapExtension implements BeforeEachCallback
         s3 = createS3(network);
         ldap = createLdap(network);
         james = createOpenPaasJamesDistributedLdap();
+    }
+
+    @SuppressWarnings("resource")
+    public GenericContainer<?> createLdap(Network network) {
+        return new GenericContainer<>("dinkel/openldap:latest")
+            .withNetworkAliases("ldap")
+            .withNetwork(network)
+            .withEnv("SLAPD_DOMAIN", "james.org")
+            .withEnv("SLAPD_PASSWORD", "mysecretpassword")
+            .withEnv("SLAPD_CONFIG_PASSWORD", "mysecretpassword")
+            .withClasspathResourceMapping("populate.ldif", "/etc/ldap/prepopulate/populate.ldif", BindMode.READ_ONLY);
     }
 
     @SuppressWarnings("resource")
