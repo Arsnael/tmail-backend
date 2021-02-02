@@ -12,6 +12,7 @@ public class OpenpaasJamesMemoryExtension implements BeforeEachCallback, AfterEa
     private static final int ONE_TIME = 1;
 
     private final GenericContainer<?> container = new GenericContainer<>("linagora/openpaas-james-memory:latest")
+        .withExposedPorts(80)
         .waitingFor(Wait.forLogMessage(".*JAMES server started.*\\n", ONE_TIME));
 
     @Override

@@ -28,8 +28,11 @@ public interface JmapContract {
 
     @BeforeEach
     default void setUp() throws Exception {
+        System.out.println("BeforeEach start");
         jmapContainer().execInContainer("james-cli", "AddDomain", "domain.tld");
         jmapContainer().execInContainer("james-cli", "AddUser", BOB.asString(), BOB_PASSWORD);
+
+        System.out.println("BeforeEach middle");
 
         PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
         authScheme.setUserName(BOB.asString());
@@ -39,13 +42,18 @@ public interface JmapContract {
             .setAccept(ContentType.JSON + "; jmapVersion=rfc-8621")
             .setAuth(authScheme)
             .build();
+
+        System.out.println("BeforeEach stops");
    }
 
    @Test
    default void mailboxGetTest() {
+       System.out.println("Test start");
        List<String> expectedMailboxes = ImmutableList.<String>builder()
            .addAll(DefaultMailboxes.DEFAULT_MAILBOXES)
            .build();
+
+        System.out.println("Test middle");
 
        given()
            .body("{" +
@@ -59,12 +67,14 @@ public interface JmapContract {
                "    \"c1\"]]" +
                "}")
        .when()
-           .post("/jmap")
+           .post("/jmap").prettyPeek()
        .then()
            .log().ifValidationFails()
            .statusCode(200)
            .body(ARGUMENTS + ".list", hasSize(6))
            .body(ARGUMENTS + ".list.name", hasItems(expectedMailboxes.toArray()));
+
+        System.out.println("Test stop");
    }
 
 }
