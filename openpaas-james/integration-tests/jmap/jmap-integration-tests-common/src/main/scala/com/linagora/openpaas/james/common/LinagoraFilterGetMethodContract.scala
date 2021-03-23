@@ -96,6 +96,7 @@ trait LinagoraFilterGetMethodContract {
          |        ]
          |      }
          |    ],
+         |    "state": "0",
          |    "notFound": []
          |  }, "c1"]]
          |}""".stripMargin)
@@ -142,6 +143,7 @@ trait LinagoraFilterGetMethodContract {
          |        ]
          |      }
          |    ],
+         |    "state": "-1",
          |    "notFound": []
          |  }, "c1"]]
          |}""".stripMargin)
@@ -336,6 +338,7 @@ trait LinagoraFilterGetMethodContract {
          |        ]
          |      }
          |    ],
+         |    "state": "0",
          |    "notFound": []
          |  }, "c1"]]
          |}""".stripMargin)
@@ -404,6 +407,7 @@ trait LinagoraFilterGetMethodContract {
          |        ]
          |      }
          |    ],
+         |    "state": "0",
          |    "notFound": ["random"]
          |  }, "c1"]]
          |}""".stripMargin)
@@ -455,6 +459,7 @@ trait LinagoraFilterGetMethodContract {
          |      "list": [
          |
          |      ],
+         |      "state": "0",
          |      "notFound": ["random"]
          |  }, "c1"]]
          |}""".stripMargin)
@@ -504,6 +509,7 @@ trait LinagoraFilterGetMethodContract {
          |    "Filter/get", {
          |      "accountId": "$generateAccountIdAsString",
          |      "list": [],
+         |      "state": "0",
          |      "notFound": []
          |  }, "c1"]]
          |}""".stripMargin)

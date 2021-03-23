@@ -1,10 +1,11 @@
 package com.linagora.openpaas.james.jmap.method
 
+import com.github.steveash.guavate.Guavate
 import com.google.inject.AbstractModule
 import com.google.inject.multibindings.{Multibinder, ProvidesIntoSet}
 import com.linagora.openpaas.james.jmap.json.FilterSerializer
 import com.linagora.openpaas.james.jmap.method.CapabilityIdentifier.LINAGORA_FILTER
-import com.linagora.openpaas.james.jmap.model.{Filter, FilterGetNotFound, FilterGetRequest, FilterGetResponse, Rule}
+import com.linagora.openpaas.james.jmap.model.{Filter, FilterGetNotFound, FilterGetRequest, FilterGetResponse, FilterState, FilterWithVersion, Rule}
 import eu.timepit.refined.auto._
 import org.apache.james.core.Username
 import org.apache.james.jmap.api.filtering.FilteringManagement
@@ -21,6 +22,8 @@ import org.reactivestreams.Publisher
 import play.api.libs.json.{JsError, JsObject, JsSuccess}
 import reactor.core.scala.publisher.{SFlux, SMono}
 
+import java.util.stream.Collectors
+import scala.jdk.CollectionConverters._
 import javax.inject.Inject
 
 case object FilterCapabilityProperties extends CapabilityProperties
@@ -68,22 +71,21 @@ class FilterGetMethod @Inject()(val metricFactory: MetricFactory,
       case errors: JsError => Left(new IllegalArgumentException(ResponseSerializer.serialize(errors).toString))
     }
 
-  private def retrieveFilters(username: Username) : SMono[Filter] =
-    SFlux.fromPublisher(filteringManagement.listRulesForUser(username))
-      .map(javaRule => Rule.fromJava(javaRule, mailboxIdFactory))
-      .collectSeq()
-      .map(rules => Filter("singleton", rules.toList))
+  private def retrieveFilters(username: Username) : SMono[FilterWithVersion] =
+    SMono.fromPublisher(filteringManagement.listRulesForUser(username))
+      .map(javaRule => FilterWithVersion(Filter("singleton", javaRule.getRules.asScala.toList.map(rule => Rule.fromJava(rule, mailboxIdFactory))), javaRule.getVersion))
 
   private def getFilterGetResponse(request: FilterGetRequest,
                                    mailboxSession: MailboxSession): SMono[FilterGetResponse] =
     request.ids match {
       case None => retrieveFilters(mailboxSession.getUser)
-        .map(filter => FilterGetResponse(request.accountId, List(filter), FilterGetNotFound(List())))
+        .map(filter => FilterGetResponse(request.accountId, List(filter.filter), FilterState(filter.version.asString()), FilterGetNotFound(List())))
       case Some(ids) => if(ids.value.contains("singleton")) {
         retrieveFilters(mailboxSession.getUser)
-          .map(filter => FilterGetResponse(request.accountId, List(filter), FilterGetNotFound(ids.value.filterNot(id => id.equals("singleton")))))
+          .map(filter => FilterGetResponse(request.accountId, List(filter.filter), FilterState(filter.version.asString()), FilterGetNotFound(ids.value.filterNot(id => id.equals("singleton")))))
       } else {
-        SMono.just(FilterGetResponse(request.accountId, List(), FilterGetNotFound(ids.value)))
+        retrieveFilters(mailboxSession.getUser)
+          .map(filter => FilterGetResponse(request.accountId, List(), FilterState(filter.version.asString()), FilterGetNotFound(ids.value)))
       }
     }
 
