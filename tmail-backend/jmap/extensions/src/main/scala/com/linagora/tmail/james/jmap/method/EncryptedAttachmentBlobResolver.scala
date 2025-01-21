@@ -45,12 +45,12 @@ case class EncryptedAttachmentBlob(blobId: BlobId, bytes: Array[Byte]) extends B
 class EncryptedAttachmentBlobResolver @Inject()(encryptedEmailContentStore: EncryptedEmailContentStore,
                                      messageIdFactory: MessageId.Factory,
                                      blobStore: BlobStore) extends BlobResolver {
-  override def resolve(blobId: BlobId, mailboxSession: MailboxSession): BlobResolutionResult =
-    EncryptedAttachmentBlobId.parse(messageIdFactory, blobId.value.value)
+  override def resolve(blobId: BlobId, mailboxSession: MailboxSession): SMono[BlobResolutionResult] =
+    SMono.just(EncryptedAttachmentBlobId.parse(messageIdFactory, blobId.value.value)
       .fold(_ => NonApplicable,
         encryptedId => Applicable(
           SMono(encryptedEmailContentStore.retrieveAttachmentContent(encryptedId.messageId, encryptedId.position))
             .flatMap((blobStoreId: org.apache.james.blob.api.BlobId) =>
               SMono(blobStore.readBytes(blobStore.getDefaultBucketName, blobStoreId, StoragePolicy.LOW_COST)))
-            .map(bytes => EncryptedAttachmentBlob(blobId, bytes))))
+            .map(bytes => EncryptedAttachmentBlob(blobId, bytes)))))
 }
